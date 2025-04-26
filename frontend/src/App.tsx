@@ -1,16 +1,14 @@
 import { Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
 import Home from "./pages/Home";
-import About from "./pages/About";
 
 function App() {
   return (
-    <div className="p-8 text-xl">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<LoginPage />} />
+    </Routes>
   );
-}
+};
 
 export default App;
