@@ -18,7 +18,7 @@ const LoginPage: React.FC = () => {
 
                 {/* 로그인 버튼 */}
                 <button className="w-full p-3 rounded bg-black text-white font-semibold">
-                    뮤직허브ID 로그인
+                    OnlyUnited 로그인
                 </button>
 
                 {/* 회원가입, 아이디 찾기, 비밀번호 찾기 */}
@@ -31,21 +31,26 @@ const LoginPage: React.FC = () => {
                 </div>
 
                 {/* 소셜 로그인 */}
-                <div className="flex flex-col gap-2 mt-6">
-                    <button className="w-full p-3 rounded bg-white hover:bg-gray-100 shadow">
-                        Google로 시작하기
+                <div className="flex flex-col gap-2 mt-6 font-semibold">
+                    <button className="w-full p-3 text-black rounded bg-white hover:bg-gray-100 shadow flex items-center justify-center gap-2.5">
+                        <img src="/google.png" alt="Google" className="w-6 h-6" />
+                        Google 로그인
                     </button>
-                    <button className="w-full p-3 rounded bg-yellow-400 hover:bg-yellow-300 shadow">
-                        Kakao로 시작하기
+
+                    <button className="w-full p-3 text-black rounded bg-yellow-400 hover:bg-yellow-300 shadow flex items-center justify-center gap-3.5">
+                        <img src="/kakao.svg" alt="Kakao" className="w-6 h-6" />
+                        카카오 로그인
                     </button>
-                    <button className="w-full p-3 rounded bg-green-500 hover:bg-green-400 text-white shadow">
-                        Naver로 시작하기
+
+                    <button className="w-full p-3 rounded bg-green-500 hover:bg-green-400 text-white shadow flex items-center justify-center gap-4">
+                        <img src="/naver.png" alt="Naver" className="w-6 h-6" />
+                        네이버 로그인
                     </button>
                 </div>
             </div>
 
             <p className="text-xs mt-10">
-                © MUSICHUB All Rights Reserved.
+                © OnlyUnited All Rights Reserved.
             </p>
         </div>
     );
