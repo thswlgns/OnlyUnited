@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const NaverStrategy = require('passport-naver').Strategy;
+const KakaoStrategy = require('passport-kakao').Strategy;
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -30,7 +31,7 @@ passport.use(new GoogleStrategy({
                 user_name: profile.displayName,
                 user_pw: 'GOOGLE_OAUTH',
                 user_nickname: profile.displayName,
-                user_gender: 'MALE', // 기본값
+                user_gender: 'MALE',
                 user_birthday: new Date('2000-01-01'),
                 user_phone: '000-0000-0000',
                 user_social: 'GOOGLE',
@@ -88,5 +89,38 @@ passport.use(new NaverStrategy({
         return done(err);
     }
 }));
+
+// 카카오
+passport.use(new KakaoStrategy({
+    clientID: process.env.KAKAO_CLIENT_ID,
+    callbackURL: "http://localhost:3001/auth/kakao/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        const nickname = profile.username || '카카오유저';
+
+        let user = await prisma.user.findFirst({ where: { user_nickname: nickname } });
+
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    user_email: `${profile.id}@kakao.com`,
+                    user_gender: 'MALE',
+                    user_birthday: new Date('2000-01-01'),
+                    user_phone: '000-0000-0000',
+                    user_social: 'KAKAO',
+                    user_role: 'USER',
+                    user_tier: 'AMATEUR',
+                    user_status: 'ACTIVE',
+                    user_pw: 'KAKAO_OAUTH',
+                    user_name: nickname,
+                    user_nickname: nickname
+                }
+            });
+        }
+        return done(null, user);
+    } catch (err) {
+        return done(err);
+    }
+}));  
 
 module.exports = passport;

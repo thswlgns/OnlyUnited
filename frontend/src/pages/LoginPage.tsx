@@ -20,6 +20,11 @@ const LoginPage: React.FC = () => {
             setUserId(id);
             if (phone === '000-0000-0000') {
                 setShowModal(true);
+            } else {
+                // ✅ 정상 유저인 경우 바로 홈페이지로 이동
+                localStorage.setItem('user_id', id);  // 예: 저장 필요 시
+                localStorage.setItem('phone', phone || '');
+                window.location.href = '/';
             }
         }
     }, []);
@@ -92,11 +97,12 @@ const LoginPage: React.FC = () => {
                 </button>
             </a>
 
-            <button className="w-full p-3 text-black rounded bg-yellow-400 hover:bg-yellow-300 shadow relative flex items-center justify-center">
-                <img src="/kakao.svg" alt="Kakao" className="absolute left-4 w-6 h-6" />
-                Kakao로 시작하기
-            </button>
-            
+            <a href="http://localhost:3001/auth/kakao">
+                <button className="w-full p-3 text-black rounded bg-yellow-400 hover:bg-yellow-300 shadow relative flex items-center justify-center">
+                    <img src="/kakao.svg" alt="Kakao" className="absolute left-4 w-6 h-6" />
+                    Kakao로 시작하기
+                </button>
+            </a>
             <a href="http://localhost:3001/auth/naver">
                 <button className="w-full p-3 text-white rounded bg-green-500 hover:bg-green-400 shadow relative flex items-center justify-center">
                     <img src="/naver.png" alt="Naver" className="absolute left-4 w-6 h-6" />

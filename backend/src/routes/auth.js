@@ -20,7 +20,7 @@ router.get('/google/callback',
 
         // ✅ JWT 토큰 발급
         const token = jwt.sign(
-        { user_id: user.user_id, user_email: user.email },
+        { user_id: user.user_id, user_email: user.user_email },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN }
         );
@@ -56,6 +56,31 @@ router.get('/naver/callback',
     }
 );
 
+// 카카오 로그인 요청
+router.get('/kakao', passport.authenticate('kakao'));
+
+// 카카오 로그인 콜백
+router.get('/kakao/callback',
+    passport.authenticate('kakao', { failureRedirect: '/' }),
+    async (req, res) => {
+        const user = req.user;
+
+        // ✅ 추가정보 입력이 필요한지 확인
+        if (!user.user_phone || !user.user_gender) {
+        return res.redirect(`/add-info?user_id=${user.user_id}`);
+        }
+
+        // ✅ JWT 토큰 발급
+        const token = jwt.sign(
+        { user_id: user.user_id, user_email: user.user_email },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN }
+        );
+
+    // 로그인 성공 시 프론트로 전달
+        res.redirect(`/login-success?token=${token}`);
+    }
+);
 
 // 추가 정보 입력
 router.patch('/complete-info', async (req, res) => {
