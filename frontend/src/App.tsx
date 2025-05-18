@@ -3,7 +3,6 @@ import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import LoginSuccessPage from "./pages/LoginSuccessPage";
 
-
 function App() {
   return (
     <Routes>

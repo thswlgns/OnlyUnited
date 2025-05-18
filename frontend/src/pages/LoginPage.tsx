@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Logo from './Logo';
+import Logo from '../Tools/Logo';
+import Signup from './Signup';
 
 const LoginPage: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
+    const [showSignupModal, setShowSignupModal] = useState(false);
     const [userId, setUserId] = useState('');
     const [form, setForm] = useState({
         user_phone: '',
@@ -81,7 +83,11 @@ const LoginPage: React.FC = () => {
 
             {/* 회원가입, 아이디 찾기, 비밀번호 찾기 */}
             <div className="flex justify-center gap-2 text-xs mt-2 text-white">
-            <a href="/signin" className="hover:underline visited:text-white">회원가입</a>
+            <button
+              type="button"
+              onClick={() => setShowSignupModal(true)}
+              className="hover:underline visited:text-white bg-transparent border-none p-0 m-0 cursor-pointer"
+            >회원가입</button>
             <span className="text-gray-400">|</span>
             <a href="/findid" className="hover:underline visited:text-white">ID찾기</a>
             <span className="text-gray-400">|</span>
@@ -154,6 +160,10 @@ const LoginPage: React.FC = () => {
             </button>
             </div>
         </div>
+        )}
+        {/* 회원가입 모달 */}
+        {showSignupModal && (
+          <Signup onClose={() => setShowSignupModal(false)} />
         )}
     </>
     );
