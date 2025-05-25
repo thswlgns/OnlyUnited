@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 // import Logo from '../Tools/Logo'; // 로고 제거
 
 interface SignupProps {
@@ -65,9 +65,9 @@ function TermsStep({ onNext }: { onNext: () => void }) {
 
 1. 회원은 언제든지 서비스 내 [회원탈퇴] 기능을 통해 탈퇴할 수 있으며, 이 경우 모든 데이터는 내부 보관 기간을 거쳐 삭제됩니다.
 2. 회사는 다음의 사유에 해당하는 경우 회원의 계정을 비활성화(user_status: 비활성)하거나 탈퇴 조치할 수 있습니다:
-   - 커뮤니티 가이드라인 위반
-   - 타인에 대한 명예 훼손, 악성 댓글 등
-   - 반복적인 신고 접수
+    - 커뮤니티 가이드라인 위반
+    - 타인에 대한 명예 훼손, 악성 댓글 등
+    - 반복적인 신고 접수
 
 제6조 (기타)
 
@@ -101,29 +101,89 @@ function TermsStep({ onNext }: { onNext: () => void }) {
   );
 }
 
-// 2단계: 이메일 인증 (더미)
+// 2단계: 이메일 인증
 function EmailStep({ onNext }: { onNext: () => void }) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
-  const [code, setCode] = useState('');
   const [inputCode, setInputCode] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300); // 5분 = 300초
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
 
-  const handleSend = () => {
-    if (!email.includes('@')) {
-      setError('올바른 이메일을 입력하세요.');
-      return;
+  useEffect(() => {
+    if (sent && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+      setTimerId(timer);
+      return () => clearInterval(timer);
+    } else if (timeLeft === 0) {
+      setSent(false);
+      setError('인증 시간이 만료되었습니다. 다시 시도해주세요.');
     }
-    setSent(true);
-    setCode('123456'); // 더미 코드
-    setError('');
+  }, [sent, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleCheck = () => {
-    if (inputCode === code) {
+  const handleSend = async () => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    
+    if (!emailRegex.test(email)) {
+      setError('올바른 이메일 형식이 아닙니다. (예: example@domain.com)');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:3001/email/authnumsend', {
+        email: email
+      }, {
+        withCredentials: true
+      });
+      
+      setSent(true);
+      setTimeLeft(300); // 타이머 리셋
+      setError('');
+    } catch (err) {
+      console.error(err);
+      setError('메일 전송에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheck = async () => {
+    if (!inputCode) {
+      setError('인증 코드를 입력해주세요.');
+      return;
+    }
+
+    if (timeLeft === 0) {
+      setError('인증 시간이 만료되었습니다. 다시 시도해주세요.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:3001/email/verifycode', {
+        email: email,
+        code: inputCode
+      }, {
+        withCredentials: true
+      });
+      
+      if (timerId) clearInterval(timerId);
       onNext();
-    } else {
+    } catch (err) {
+      console.error(err);
       setError('인증 코드가 올바르지 않습니다.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,31 +199,43 @@ function EmailStep({ onNext }: { onNext: () => void }) {
       />
       {!sent ? (
         <button
-          className="w-full p-3 rounded bg-white text-black font-semibold mt-2"
+          className="w-full p-3 rounded bg-white text-black font-semibold mt-2 disabled:opacity-50"
           onClick={handleSend}
+          disabled={loading}
         >
-          인증 메일 발송
+          {loading ? '전송 중...' : '인증 메일 발송'}
         </button>
       ) : (
         <>
-          <input
-            type="text"
-            placeholder="인증 코드 입력"
-            value={inputCode}
-            onChange={e => setInputCode(e.target.value)}
-            className="w-full p-3 rounded bg-black border border-gray-600 focus:outline-none text-white placeholder-gray-400"
-          />
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="인증 코드 입력"
+              value={inputCode}
+              onChange={e => setInputCode(e.target.value)}
+              className="flex-1 p-3 rounded bg-black border border-gray-600 focus:outline-none text-white placeholder-gray-400"
+            />
+            <div className="text-blue-500 font-mono font-bold">{formatTime(timeLeft)}</div>
+          </div>
           <button
-            className="w-full p-3 rounded bg-white text-black font-semibold mt-2"
+            className="w-full p-3 rounded bg-white text-black font-semibold mt-2 disabled:opacity-50"
             onClick={handleCheck}
+            disabled={loading || timeLeft === 0}
           >
-            인증 코드 확인
+            {loading ? '확인 중...' : '인증 코드 확인'}
           </button>
+          {timeLeft < 60 && timeLeft > 0 && (
+            <div className="text-yellow-500 text-xs text-center">
+              인증 시간이 1분 미만 남았습니다!
+            </div>
+          )}
         </>
       )}
       {error && <div className="text-red-400 text-xs ml-1">{error}</div>}
       {sent && !error && (
-        <div className="text-green-400 text-xs ml-1">인증 메일이 발송되었습니다. (코드: 123456)</div>
+        <div className="text-green-500 text-xs ml-1">
+          인증 코드가 이메일로 전송되었습니다. 이메일을 확인해주세요.
+        </div>
       )}
     </div>
   );
