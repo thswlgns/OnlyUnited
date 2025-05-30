@@ -1,12 +1,13 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const passport = require('./config/passport');
-require('dotenv').config();
 
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
-const cors = require('cors');
+const emailRouter = require('./routes/email'); // ✅ 추가
 
+const cors = require('cors');
 const app = express();
 const PORT = 3001;
 
@@ -29,22 +30,21 @@ app.use(passport.session());
 
 app.use(express.json());
 
+// ✅ 라우터 등록
 app.use('/api/user', userRouter);
 app.use('/auth', authRouter);
+app.use('/email', emailRouter); // ✅ 이메일 인증 라우터 등록
 
 app.get('/', (req, res) => {
     res.send('server running!');
 });
 
-// 로그인 성공시 리다이렉트 처리
 app.get('/login-success', (req, res) => {
     const user = req.user;
-
     if (user) {
         const { user_id, user_phone } = user;
         return res.redirect(`http://localhost:5173/login?user_id=${user_id}&phone=${user_phone}`);
     }
-
     res.redirect('http://localhost:5173');
 });
 
