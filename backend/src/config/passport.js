@@ -1,3 +1,4 @@
+require('dotenv').config();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const NaverStrategy = require('passport-naver').Strategy;
@@ -20,6 +21,7 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "http://localhost:3001/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
+    console.log('✅ 구글 프로필 수신 성공:', profile);
     const email = profile.emails[0].value;
 
     let user = await prisma.user.findUnique({ where: { user_email: email } });

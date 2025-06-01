@@ -1,30 +1,11 @@
-const jwt = require('jsonwebtoken');
-
 const authMiddleware = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(400).json({ message: 'Authentication is required. '});
+    // passport가 로그인된 상태이면 req.isAuthenticated() === true
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: '로그인이 필요합니다.' });
     }
 
-    const token = authHeader.split(' ')[1];
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        req.user = {
-            user_id: decoded.user_id,
-            user_email: decoded.user_email,
-        };
-
-        next();
-    } catch (err) {
-        if(err.name === ' TokenExpiredError') {
-            return res.status(401).json({ message: 'Token has expired. Please login again.'});
-        } else {
-            return res.status(401).json({ message: 'Invalid token. '});
-        }  
-    }
+    // 로그인된 사용자 정보는 req.user에 자동으로 있음
+    next();
 };
 
 module.exports = authMiddleware;

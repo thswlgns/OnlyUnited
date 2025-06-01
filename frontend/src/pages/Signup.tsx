@@ -102,7 +102,7 @@ function TermsStep({ onNext }: { onNext: () => void }) {
 }
 
 // 2단계: 이메일 인증
-function EmailStep({ onNext }: { onNext: () => void }) {
+function EmailStep({ onNext }: { onNext: (email: string) => void }) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [inputCode, setInputCode] = useState('');
@@ -178,7 +178,7 @@ function EmailStep({ onNext }: { onNext: () => void }) {
       });
       
       if (timerId) clearInterval(timerId);
-      onNext();
+      onNext(email);
     } catch (err) {
       console.error(err);
       setError('인증 코드가 올바르지 않습니다.');
@@ -242,12 +242,32 @@ function EmailStep({ onNext }: { onNext: () => void }) {
 }
 
 // 3단계: 전화번호 인증 (더미)
-function PhoneStep({ onNext }: { onNext: () => void }) {
+function PhoneStep({ onNext }: { onNext: (phone: string) => void }) {
   const [phone, setPhone] = useState('');
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState('');
   const [inputCode, setInputCode] = useState('');
   const [error, setError] = useState('');
+
+  // 전화번호 형식화 함수
+  const formatPhoneNumber = (value: string) => {
+    const numbers = value.replace(/[^\d]/g, '');
+    if (numbers.length <= 3) {
+      return numbers;
+    } else if (numbers.length <= 7) {
+      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    } else {
+      return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatPhoneNumber(value);
+    if (formattedValue.length <= 13) { // 010-1234-5678 형식의 최대 길이
+      setPhone(formattedValue);
+    }
+  };
 
   const handleSend = () => {
     if (!/^01[0-9]-\d{3,4}-\d{4}$/.test(phone)) {
@@ -255,13 +275,13 @@ function PhoneStep({ onNext }: { onNext: () => void }) {
       return;
     }
     setSent(true);
-    setCode('246810'); // 더미 코드
+    setCode('123456'); // 더미 코드
     setError('');
   };
 
   const handleCheck = () => {
     if (inputCode === code) {
-      onNext();
+      onNext(phone);
     } else {
       setError('인증 코드가 올바르지 않습니다.');
     }
@@ -270,12 +290,13 @@ function PhoneStep({ onNext }: { onNext: () => void }) {
   return (
     <div className="flex flex-col gap-4">
       <input
-        type="text"
-        placeholder="전화번호 (예: 010-1234-5678)"
+        type="tel"
+        placeholder="전화번호 (숫자만 입력)"
         value={phone}
-        onChange={e => setPhone(e.target.value)}
+        onChange={handlePhoneChange}
         className="w-full p-3 rounded bg-black border border-gray-600 focus:outline-none text-white placeholder-gray-400"
         disabled={sent}
+        maxLength={13}
       />
       {!sent ? (
         <button
@@ -303,21 +324,21 @@ function PhoneStep({ onNext }: { onNext: () => void }) {
       )}
       {error && <div className="text-red-400 text-xs ml-1">{error}</div>}
       {sent && !error && (
-        <div className="text-green-400 text-xs ml-1">인증 코드가 발송되었습니다. (코드: 246810)</div>
+        <div className="text-green-400 text-xs ml-1">인증 코드가 발송되었습니다. (코드: 123456)</div>
       )}
     </div>
   );
 }
 
 // 4단계: 비밀번호 설정
-function PasswordStep({ onNext }: { onNext: () => void }) {
+function PasswordStep({ onNext }: { onNext: (password: string) => void }) {
   const [pw, setPw] = useState('');
   const [pwCheck, setPwCheck] = useState('');
   const isPwMatch = pw && pw === pwCheck;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isPwMatch) onNext();
+    if (isPwMatch) onNext(pw);
   };
 
   return (
@@ -353,7 +374,7 @@ function PasswordStep({ onNext }: { onNext: () => void }) {
 }
 
 // 5단계: 개인정보 입력
-function InfoStep({ onNext }: { onNext: () => void }) {
+function InfoStep({ signupData, onNext }: { signupData: any, onNext: () => void }) {
   const [form, setForm] = useState({
     user_name: '',
     user_nickname: '',
@@ -361,6 +382,7 @@ function InfoStep({ onNext }: { onNext: () => void }) {
     user_birthday: '',
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -369,10 +391,30 @@ function InfoStep({ onNext }: { onNext: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    setError('');
+
+    try {
+      const response = await axios.post('http://localhost:3001/api/user/signup', {
+        user_email: signupData.email,
+        user_pw: signupData.password,
+        user_phone: signupData.user_phone,  // 전화번호 추가
+        user_name: form.user_name,
+        user_nickname: form.user_nickname,
+        user_gender: form.user_gender === '남' ? 'MALE' : 'FEMALE',
+        user_birthday: form.user_birthday
+      }, {
+        withCredentials: true
+      });
+
+      if (response.status === 201) {
+        onNext();
+      }
+    } catch (err) {
+      console.error('회원가입 실패:', err);
+      setError('회원가입에 실패했습니다. 다시 시도해주세요.');
+    } finally {
       setLoading(false);
-      onNext();
-    }, 500);
+    }
   };
 
   return (
@@ -402,7 +444,6 @@ function InfoStep({ onNext }: { onNext: () => void }) {
         required
         className="w-full p-3 rounded bg-black border border-gray-600 focus:outline-none text-white placeholder-gray-400"
       >
-        <option value="" disabled>성별 선택</option>
         <option value="남">남</option>
         <option value="여">여</option>
       </select>
@@ -415,12 +456,13 @@ function InfoStep({ onNext }: { onNext: () => void }) {
         required
         className="w-full p-3 rounded bg-black border border-gray-600 focus:outline-none text-white placeholder-gray-400"
       />
+      {error && <div className="text-red-500 text-sm">{error}</div>}
       <button
         type="submit"
-        className="w-full p-3 rounded bg-white text-black font-semibold mt-2"
+        className="w-full p-3 rounded bg-white text-black font-semibold mt-2 disabled:opacity-50"
         disabled={loading}
       >
-        회원가입
+        {loading ? '처리 중...' : '회원가입'}
       </button>
     </form>
   );
@@ -444,6 +486,15 @@ function CompleteStep({ onClose }: { onClose: () => void }) {
 const Signup: React.FC<SignupProps> = ({ onClose }) => {
   const [step, setStep] = useState(1);
   const [show, setShow] = useState(false);
+  const [signupData, setSignupData] = useState({
+    email: '',
+    password: '',
+    user_phone: '',
+    user_name: '',
+    user_nickname: '',
+    user_gender: '남',
+    user_birthday: '',
+  });
 
   useEffect(() => {
     setShow(true);
@@ -452,6 +503,10 @@ const Signup: React.FC<SignupProps> = ({ onClose }) => {
   const handleClose = () => {
     setShow(false);
     setTimeout(onClose, 300);
+  };
+
+  const updateSignupData = (data: Partial<typeof signupData>) => {
+    setSignupData(prev => ({ ...prev, ...data }));
   };
 
   return (
@@ -475,10 +530,36 @@ const Signup: React.FC<SignupProps> = ({ onClose }) => {
         </div>
         {/* 단계별 내용 */}
         {step === 1 && <TermsStep onNext={() => setStep(2)} />}
-        {step === 2 && <EmailStep onNext={() => setStep(3)} />}
-        {step === 3 && <PhoneStep onNext={() => setStep(4)} />}
-        {step === 4 && <PasswordStep onNext={() => setStep(5)} />}
-        {step === 5 && <InfoStep onNext={() => setStep(6)} />}
+        {step === 2 && (
+          <EmailStep
+            onNext={(email) => {
+              updateSignupData({ email });
+              setStep(3);
+            }}
+          />
+        )}
+        {step === 3 && (
+          <PhoneStep
+            onNext={(phone) => {
+              updateSignupData({ user_phone: phone });
+              setStep(4);
+            }}
+          />
+        )}
+        {step === 4 && (
+          <PasswordStep
+            onNext={(password) => {
+              updateSignupData({ password });
+              setStep(5);
+            }}
+          />
+        )}
+        {step === 5 && (
+          <InfoStep
+            signupData={signupData}
+            onNext={() => setStep(6)}
+          />
+        )}
         {step === 6 && <CompleteStep onClose={handleClose} />}
         <div className="text-xs mt-6 text-gray-400 text-center">© OnlyUnited All Rights Reserved.</div>
       </div>

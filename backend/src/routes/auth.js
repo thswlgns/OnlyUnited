@@ -9,24 +9,32 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 
 // 구글 로그인 콜백
 router.get('/google/callback',
+    (req, res, next) => {
+        console.log('📥 Google callback hit:', req.query);
+        next();
+    },
     passport.authenticate('google', { failureRedirect: '/' }),
     async (req, res) => {
-        const user = req.user;
+        try {
+            const user = req.user;
+        
+            // ✅ 추가정보 입력이 필요한지 확인
+            if (!user.user_phone || !user.user_gender) {
+                return res.redirect(`/add-info?user_id=${user.user_id}`);
+            }
 
-        // ✅ 추가정보 입력이 필요한지 확인
-        if (!user.user_phone || !user.user_gender) {
-        return res.redirect(`/add-info?user_id=${user.user_id}`);
+            // ✅ JWT 토큰 발급
+            const token = jwt.sign(
+                { user_id: user.user_id, user_email: user.user_email },
+                process.env.JWT_SECRET,
+                { expiresIn: process.env.JWT_EXPIRES_IN }
+            );
+
+            res.redirect(`/login-success?token=${token}`);
+        } catch (err) {
+            console.error('❌ 콜백 핸들링 중 에러:', err); // ✅ 꼭 추가하세요
+            res.status(500).send('Internal Server Error');
         }
-
-        // ✅ JWT 토큰 발급
-        const token = jwt.sign(
-        { user_id: user.user_id, user_email: user.user_email },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN }
-        );
-
-        // 로그인 성공 시 프론트로 전달
-        res.redirect(`/login-success?token=${token}`);
     }
 );
 
@@ -103,5 +111,22 @@ router.patch('/complete-info', async (req, res) => {
     }
 });
 
+// 로그아웃 세션 가져오기
+router.get('/logout', (req, res, next) => {
+    req.logout(function(err) {
+        if (err) return next(err);
+
+        req.session.destroy((err) => {
+            if (err) return next(err);
+
+            res.clearCookie('connect.sid', {
+                path: '/',
+                httpOnly: true,
+            });
+
+            return res.status(200).send('✅ 로그아웃 완료');
+        });
+    });
+});
 
 module.exports = router;
