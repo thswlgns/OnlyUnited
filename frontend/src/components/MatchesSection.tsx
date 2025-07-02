@@ -15,6 +15,13 @@ const MatchesSection = () => {
     return `${date.getMonth() + 1}월 ${date.getDate()}일`;
   };
 
+  // 경기가 예정인지 완료인지 판단하는 함수
+  const isMatchScheduled = (utcDate: string) => {
+    const matchDate = new Date(utcDate);
+    const now = new Date();
+    return matchDate > now;
+  };
+
   // 승패 계산 함수
   const getMatchResult = (match: any, teamId: number): "승" | "패" | "무" | null => {
     if (!match.score.fullTime) return null;
@@ -57,29 +64,30 @@ const MatchesSection = () => {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
+        // 모든 경기 데이터를 가져옴 (예정 + 완료)
         const res = await axios.get('/football-api/v4/teams/66/matches?status=SCHEDULED&limit=5', {
           headers: {
             'X-Auth-Token': import.meta.env.VITE_FOOTBALL_DATA_KEY
           }
         });
+        console.log(res.data);
+        
+        const allMatches = res.data.matches || [];
+        
+        // 현재 시각 기준으로 예정 경기와 완료된 경기 분리
+        const scheduledMatches = allMatches.filter((match: any) => isMatchScheduled(match.utcDate));
+        const finishedMatches = allMatches.filter((match: any) => !isMatchScheduled(match.utcDate) && match.score.fullTime.home !== null);
 
-        const matches = res.data.matches || [];
-
-        if (matches.length > 0) {
-          setHighlightMatch(matches[0]);
-          setUpcomingMatches(matches.slice(1, 5));
+        if (scheduledMatches.length > 0) {
+          // 예정 경기가 있으면 첫 번째 경기를 하이라이트, 나머지를 리스트로
+          setHighlightMatch(scheduledMatches[0]);
+          setUpcomingMatches(scheduledMatches.slice(1, 5));
           setIsUpcoming(true);
-        } else {
-          const fallbackRes = await axios.get('/football-api/v4/teams/66/matches?status=FINISHED&limit=5', {
-            headers: {
-              'X-Auth-Token': import.meta.env.VITE_FOOTBALL_DATA_KEY
-            }
-          });
-
-          const finishedMatches = fallbackRes.data.matches || [];
-
-          setHighlightMatch(finishedMatches.at(-1));
-          setUpcomingMatches(finishedMatches.slice(-5, -1));
+        } else if (finishedMatches.length > 0) {
+          // 예정 경기가 없고 완료된 경기가 있으면 가장 최근 경기를 하이라이트
+          const latestMatch = finishedMatches[finishedMatches.length - 1];
+          setHighlightMatch(latestMatch);
+          setUpcomingMatches(finishedMatches.slice(-4));
           setIsUpcoming(false);
         }
       } catch (err) {
@@ -93,7 +101,8 @@ const MatchesSection = () => {
   if (!highlightMatch) return null;
 
   const { homeTeam, awayTeam, utcDate, score } = highlightMatch;
-  const mainResult = !isUpcoming ? getMatchResult(highlightMatch, MANCHESTER_UNITED_ID) : null;
+  const isHighlightScheduled = isMatchScheduled(utcDate);
+  const mainResult = !isHighlightScheduled ? getMatchResult(highlightMatch, MANCHESTER_UNITED_ID) : null;
 
   const leftHomeTeam = (team: any) => {
     return (
@@ -159,13 +168,13 @@ const MatchesSection = () => {
     <div className="text-white space-y-8">
       {/* ✅ 상단 하이라이트 경기 */}
       <div className="bg-[#2e2d2d] rounded-lg shadow text-center pt-8 pb-8">
-        <h2 className="text-3xl font-bold mb-2">최근 경기</h2>
+        <h2 className="text-3xl font-bold mb-2">{isHighlightScheduled ? '다음 경기' : '최근 경기'}</h2>
         <div className="flex justify-between items-center gap-2 mb-4">
           {leftHomeTeam(homeTeam)}
           <div className="text-center">
             <div className="text-gray-400 text-sm mb-2">{formatDate(utcDate)}</div>
             <div className="text-7xl font-extrabold tracking-wider">
-              {score.fullTime.home} : {score.fullTime.away}
+              {isHighlightScheduled ? 'VS' : `${score.fullTime.home} : ${score.fullTime.away}`}
             </div>
             <div className={`text-xl font-bold mt-2 ${getResultColor(mainResult)}`}>
               {mainResult}
@@ -179,7 +188,8 @@ const MatchesSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {upcomingMatches.map(match => {
           const { home, away } = match.score.fullTime || { home: null, away: null };
-          const result = !isUpcoming ? getMatchResult(match, MANCHESTER_UNITED_ID) : null;
+          const isScheduled = isMatchScheduled(match.utcDate);
+          const result = !isScheduled ? getMatchResult(match, MANCHESTER_UNITED_ID) : null;
 
           return (
             <div key={match.id} className="bg-[#2e2d2d] pt-4 pb-4 rounded-lg shadow text-sm space-y-2">
@@ -188,9 +198,9 @@ const MatchesSection = () => {
                 {homeTeamSmall(match.homeTeam, match)}
                 <div className="text-center">
                   <div className="text-2xl font-semibold">
-                    {isUpcoming ? 'VS' : `${home} : ${away}`}
+                    {isScheduled ? 'VS' : `${home} : ${away}`}
                   </div>
-                  {!isUpcoming && (
+                  {!isScheduled && (
                     <div className={`text-sm font-bold mt-1 ${getResultColor(result)}`}>
                       {result}
                     </div>
