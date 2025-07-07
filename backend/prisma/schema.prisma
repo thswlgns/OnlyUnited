@@ -53,3 +53,28 @@ enum Status {
   INACTIVE
   BANNED
 }
+
+model Match {
+  id           BigInt   @id
+  matchday     Int?
+  utcDate      DateTime
+  homeTeam     String
+  homeTeamId   Int?
+  awayTeam     String
+  awayTeamId   Int?
+  status       String
+  competition  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model TeamStanding {
+  id        Int      @id @default(autoincrement())
+  teamId    Int      @unique
+  name      String
+  crest     String
+  position  Int
+  points    Int
+  updatedAt DateTime @updatedAt
+}
+

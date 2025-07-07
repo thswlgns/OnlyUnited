@@ -10,14 +10,14 @@ const StandingSection = () => {
     useEffect(() => {
         const fetchStandings = async () => {
         try {
-            const res = await axios.get('/football-api/v4/competitions/2021/standings', {
-                headers: {
-                    'X-Auth-Token': import.meta.env.VITE_FOOTBALL_DATA_KEY
-                }
-            });
+            const res = await axios.get('http://localhost:3001/api/standings');
+            console.log('순위표 데이터:', res.data);
 
-            const fullTable = res.data.standings[0]?.table || [];
-            const manuIndex = fullTable.findIndex((team: any) => team.team.id === MANCHESTER_UNITED_ID);
+            // 배열이 어디에 있는지 확인 후 꺼내기
+            const fullTable = Array.isArray(res.data)
+                ? res.data
+                : (res.data.standings || res.data.data || []);
+            const manuIndex = fullTable.findIndex((team: any) => team.teamId === MANCHESTER_UNITED_ID);
     
             // 맨유 위 2팀 + 본인 + 아래 2팀 → 총 5팀만 추출
             const customTable = fullTable.slice(Math.max(0, manuIndex - 2), manuIndex + 3);
@@ -39,16 +39,16 @@ const StandingSection = () => {
             <div className="space-y-2">
                 {table.map((team: any) => (
                 <div
-                    key={team.team.id}
+                    key={team.teamId}
                     className={`flex items-center justify-between bg-[#2e2d2d] p-3 rounded-lg ${
-                    team.team.id === MANCHESTER_UNITED_ID ? 'border border-red-600' : ''
+                    team.teamId === MANCHESTER_UNITED_ID ? 'border border-red-600' : ''
                     }`}
                 >
                     <div className="flex items-center gap-3">
                         <span className="text-gray-400 w-4">{team.position}</span>
-                        <img src={team.team.crest} alt={team.team.name} className="w-6 h-6" />
+                        <img src={team.crest} alt={team.name} className="w-6 h-6" />
                         <span className="text-white">
-                            {teamNameKoMap[team.team.id] || team.team.name}
+                            {teamNameKoMap[team.teamId] || team.name}
                         </span>
                     </div>
                     <span className="text-white">{team.points}</span>

@@ -5,7 +5,11 @@ const passport = require('./config/passport');
 
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
-const emailRouter = require('./routes/email'); // ✅ 추가
+const emailRouter = require('./routes/email');
+const matchRoutes = require('./routes/match');
+const standingRouter = require('./routes/standing');
+require('./jobs/matchSyncJob');
+require('./jobs/standingSyncJob');
 
 const cors = require('cors');
 const app = express();
@@ -33,7 +37,9 @@ app.use(express.json());
 // ✅ 라우터 등록
 app.use('/api/user', userRouter);
 app.use('/auth', authRouter);
-app.use('/email', emailRouter); // ✅ 이메일 인증 라우터 등록
+app.use('/email', emailRouter);
+app.use('/api/scheduled-matches', matchRoutes);
+app.use('/api/standings', standingRouter);
 
 app.get('/', (req, res) => {
     res.send('server running!');
