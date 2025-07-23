@@ -78,3 +78,15 @@ model TeamStanding {
   updatedAt DateTime @updatedAt
 }
 
+model News {
+  id             Int      @id @default(autoincrement())
+  title          String
+  summary        String?
+  url            String   @db.Text
+  imageUrl       String?
+  pressName      String?
+  pressLogoUrl   String?
+  publishedAt    DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

@@ -8,8 +8,10 @@ const authRouter = require('./routes/auth');
 const emailRouter = require('./routes/email');
 const matchRoutes = require('./routes/match');
 const standingRouter = require('./routes/standing');
+const newsRoute = require('./routes/news');
 require('./jobs/matchSyncJob');
 require('./jobs/standingSyncJob');
+require('./jobs/newsSyncJob'); 
 
 const cors = require('cors');
 const app = express();
@@ -40,6 +42,7 @@ app.use('/auth', authRouter);
 app.use('/email', emailRouter);
 app.use('/api/scheduled-matches', matchRoutes);
 app.use('/api/standings', standingRouter);
+app.use('/api/news', newsRoute);
 
 app.get('/', (req, res) => {
     res.send('server running!');

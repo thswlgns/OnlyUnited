@@ -4,6 +4,7 @@ import axios from 'axios';
 import Logo from '../components/Logo';
 import MatchesSection from '../components/MatchesSection';
 import StandingSection from "../components/StandingSection";
+import MainNews from "../components/MainNews";
 
 interface User {
     user_profile_image?: string;
@@ -129,6 +130,11 @@ const Home = () => {
 
                         {/* 순위 섹션 */}
                         <StandingSection />
+                    </div>
+
+                    {/* 뉴스 섹션 - 전체(3/3) */}
+                    <div className="col-span-3 bg-[#545454] rounded-lg p-4 mt-2">
+                        <MainNews />
                     </div>
                 </div>
             </div>
