@@ -20,11 +20,6 @@ const matchDetailRoutes = require('./routes/matchDetail');
 const boardRoutes    = require('./routes/board');
 const transferRoutes = require('./routes/transfer');
 
-require('./jobs/matchSyncJob');
-require('./jobs/standingSyncJob');
-require('./jobs/newsSyncJob');
-require('./jobs/playerSyncJob');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -51,4 +46,9 @@ app.get('/', (req, res) => res.json({ status: 'ok' }));
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server running on port ${PORT}`);
+    // 서버 시작 후 백그라운드 작업 로드
+    require('./jobs/matchSyncJob');
+    require('./jobs/standingSyncJob');
+    require('./jobs/newsSyncJob');
+    require('./jobs/playerSyncJob');
 });
