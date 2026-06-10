@@ -81,7 +81,7 @@ const syncMatches = async (fullSync = false) => {
 // 6시간마다 정기 동기화
 cron.schedule('0 */6 * * *', () => syncMatches(false));
 
-// 서버 시작 시 실행
-syncMatches(false);
+// 서버 시작 시 전체 동기화
+syncMatches(true);
 
 module.exports = { syncMatches };
