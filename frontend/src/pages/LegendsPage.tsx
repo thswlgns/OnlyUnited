@@ -1,30 +1,31 @@
 import { useState } from 'react';
+import { legendImg } from '../constants/legendImages';
 
 // ── 역대 기록 데이터 ──────────────────────────────────────────────────────────
 const TOP_APPEARANCES = [
-    { rank: 1,  name: '라이언 긱스',        nameEn: 'Ryan Giggs',        apps: 963,  years: '1990–2014', img: 'https://img.a.transfermarkt.technology/portrait/big/5490-1441272017.jpg' },
-    { rank: 2,  name: '바비 찰튼',          nameEn: 'Bobby Charlton',    apps: 758,  years: '1956–1973', img: 'https://img.a.transfermarkt.technology/portrait/big/2548-1442925905.jpg' },
-    { rank: 3,  name: '빌 폴크스',          nameEn: 'Bill Foulkes',      apps: 688,  years: '1952–1970', img: '' },
-    { rank: 4,  name: '팔 스콜스',          nameEn: 'Paul Scholes',      apps: 718,  years: '1993–2013', img: 'https://img.a.transfermarkt.technology/portrait/big/11665-1481040481.jpg' },
-    { rank: 5,  name: '게리 네빌',          nameEn: 'Gary Neville',      apps: 602,  years: '1992–2011', img: 'https://img.a.transfermarkt.technology/portrait/big/11666-1437038012.jpg' },
-    { rank: 6,  name: '알렉스 스테프니',    nameEn: 'Alex Stepney',      apps: 539,  years: '1966–1978', img: '' },
-    { rank: 7,  name: '토니 던',            nameEn: 'Tony Dunne',        apps: 535,  years: '1960–1973', img: '' },
-    { rank: 8,  name: '데니스 어윈',        nameEn: 'Denis Irwin',       apps: 529,  years: '1990–2002', img: 'https://img.a.transfermarkt.technology/portrait/big/11668-1481040481.jpg' },
-    { rank: 9,  name: '로이 킨',            nameEn: 'Roy Keane',         apps: 480,  years: '1993–2005', img: 'https://img.a.transfermarkt.technology/portrait/big/11667-1481040481.jpg' },
-    { rank: 10, name: '브라이언 롭슨',      nameEn: 'Bryan Robson',      apps: 461,  years: '1981–1994', img: 'https://img.a.transfermarkt.technology/portrait/big/2544-1441968013.jpg' },
+    { rank: 1,  name: '라이언 긱스',        nameEn: 'Ryan Giggs',        apps: 963,  years: '1990–2014' },
+    { rank: 2,  name: '바비 찰튼',          nameEn: 'Bobby Charlton',    apps: 758,  years: '1956–1973' },
+    { rank: 3,  name: '빌 폴크스',          nameEn: 'Bill Foulkes',      apps: 688,  years: '1952–1970' },
+    { rank: 4,  name: '팔 스콜스',          nameEn: 'Paul Scholes',      apps: 718,  years: '1993–2013' },
+    { rank: 5,  name: '게리 네빌',          nameEn: 'Gary Neville',      apps: 602,  years: '1992–2011' },
+    { rank: 6,  name: '알렉스 스테프니',    nameEn: 'Alex Stepney',      apps: 539,  years: '1966–1978' },
+    { rank: 7,  name: '토니 던',            nameEn: 'Tony Dunne',        apps: 535,  years: '1960–1973' },
+    { rank: 8,  name: '데니스 어윈',        nameEn: 'Denis Irwin',       apps: 529,  years: '1990–2002' },
+    { rank: 9,  name: '로이 킨',            nameEn: 'Roy Keane',         apps: 480,  years: '1993–2005' },
+    { rank: 10, name: '브라이언 롭슨',      nameEn: 'Bryan Robson',      apps: 461,  years: '1981–1994' },
 ];
 
 const TOP_SCORERS = [
-    { rank: 1,  name: '웨인 루니',          nameEn: 'Wayne Rooney',      goals: 253, years: '2004–2017', img: 'https://img.a.transfermarkt.technology/portrait/big/2814-1492076714.jpg' },
-    { rank: 2,  name: '바비 찰튼',          nameEn: 'Bobby Charlton',    goals: 249, years: '1956–1973', img: 'https://img.a.transfermarkt.technology/portrait/big/2548-1442925905.jpg' },
-    { rank: 3,  name: '데니스 로',          nameEn: 'Denis Law',         goals: 237, years: '1962–1973', img: '' },
-    { rank: 4,  name: '잭 롤리',            nameEn: 'Jack Rowley',       goals: 211, years: '1937–1955', img: '' },
-    { rank: 5,  name: '크리스티아누 호날두', nameEn: 'Cristiano Ronaldo', goals: 145, years: '2003–2009 / 2021–2022', img: 'https://img.a.transfermarkt.technology/portrait/big/8198-1698767940.jpg' },
-    { rank: 6,  name: '라이언 긱스',        nameEn: 'Ryan Giggs',        goals: 168, years: '1990–2014', img: 'https://img.a.transfermarkt.technology/portrait/big/5490-1441272017.jpg' },
-    { rank: 7,  name: '조지 베스트',        nameEn: 'George Best',       goals: 179, years: '1963–1974', img: '' },
-    { rank: 8,  name: '마커스 래쉬포드',    nameEn: 'Marcus Rashford',   goals: 138, years: '2016–2025', img: 'https://img.a.transfermarkt.technology/portrait/big/314571-1695050400.jpg' },
-    { rank: 9,  name: '앤디 콜',            nameEn: 'Andy Cole',         goals: 121, years: '1995–2001', img: '' },
-    { rank: 10, name: '루드 반 니스텔로이', nameEn: 'Ruud van Nistelrooy', goals: 150, years: '2001–2006', img: 'https://img.a.transfermarkt.technology/portrait/big/3471-1481040481.jpg' },
+    { rank: 1,  name: '웨인 루니',          nameEn: 'Wayne Rooney',      goals: 253, years: '2004–2017' },
+    { rank: 2,  name: '바비 찰튼',          nameEn: 'Bobby Charlton',    goals: 249, years: '1956–1973' },
+    { rank: 3,  name: '데니스 로',          nameEn: 'Denis Law',         goals: 237, years: '1962–1973' },
+    { rank: 4,  name: '잭 롤리',            nameEn: 'Jack Rowley',       goals: 211, years: '1937–1955' },
+    { rank: 5,  name: '크리스티아누 호날두', nameEn: 'Cristiano Ronaldo', goals: 145, years: '2003–2009 / 2021–2022' },
+    { rank: 6,  name: '라이언 긱스',        nameEn: 'Ryan Giggs',        goals: 168, years: '1990–2014' },
+    { rank: 7,  name: '조지 베스트',        nameEn: 'George Best',       goals: 179, years: '1963–1974' },
+    { rank: 8,  name: '마커스 래쉬포드',    nameEn: 'Marcus Rashford',   goals: 138, years: '2016–2025' },
+    { rank: 9,  name: '앤디 콜',            nameEn: 'Andy Cole',         goals: 121, years: '1995–2001' },
+    { rank: 10, name: '루드 반 니스텔로이', nameEn: 'Ruud van Nistelrooy', goals: 150, years: '2001–2006' },
 ];
 
 // ── 역대 명장면/전설 선수 ─────────────────────────────────────────────────────
@@ -35,7 +36,6 @@ const LEGENDS = [
         era: '1963–1974',
         position: '윙',
         desc: '역대 최고의 드리블러 중 하나. \'엘 베아트레스(El Beatle)\'로 불리며 1968년 유러피언컵 우승 주역. 발롱도르 수상(1968).',
-        img: '',
         badge: 'ICON',
         badgeCls: 'bg-purple-700',
     },
@@ -45,7 +45,6 @@ const LEGENDS = [
         era: '1956–1973',
         position: '미드필더',
         desc: '뮌헨 공항 참사에서 생존해 맨유의 영광을 이끈 레전드. 1968년 유러피언컵, 1966년 월드컵 우승. 구단 역대 2위 득점 758경기 249골.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/2548-1442925905.jpg',
         badge: 'ICON',
         badgeCls: 'bg-purple-700',
     },
@@ -55,7 +54,6 @@ const LEGENDS = [
         era: '1992–1997',
         position: '포워드',
         desc: '\'킹 에릭\'. 맨유 왕조의 시작을 알린 상징적 존재. 프리미어리그 창설 초기 4번의 우승을 견인. 칼라 올린 자켓으로 유명.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/2539-1481040481.jpg',
         badge: 'KING',
         badgeCls: 'bg-yellow-700',
     },
@@ -65,7 +63,6 @@ const LEGENDS = [
         era: '1990–2014',
         position: '윙 / 미드필더',
         desc: '구단 역대 최다 출장 963경기. 13번의 프리미어리그 우승 포함 트로피 34개. FA컵 5분 기적 드리블은 역대 최고의 골 중 하나.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/5490-1441272017.jpg',
         badge: 'RECORD',
         badgeCls: 'bg-blue-700',
     },
@@ -75,7 +72,6 @@ const LEGENDS = [
         era: '1993–2005',
         position: '미드필더',
         desc: '역대 최고의 맨유 주장. 1999 트레블의 심장. 유베전 챔피언스리그 준결승 혼자 경기를 뒤집은 전설의 미드필더.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/11667-1481040481.jpg',
         badge: 'CAPTAIN',
         badgeCls: 'bg-red-700',
     },
@@ -85,7 +81,6 @@ const LEGENDS = [
         era: '2003–2009 / 2021–2022',
         position: '윙 / 포워드',
         desc: '1기 맨유에서 세계 최고로 성장. 2007-08 챔피언스리그 우승, 발롱도르 수상. 2기는 짧았지만 통산 145골로 영원한 전설.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/8198-1698767940.jpg',
         badge: 'BALLON',
         badgeCls: 'bg-yellow-600',
     },
@@ -95,7 +90,6 @@ const LEGENDS = [
         era: '1993–2013',
         position: '미드필더',
         desc: '치아비, 지단도 인정한 역대 최고의 패서. 718경기 155골. 은퇴 후 복귀한 맨유 원클럽맨. 12번의 리그 우승.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/11665-1481040481.jpg',
         badge: 'MAESTRO',
         badgeCls: 'bg-green-700',
     },
@@ -105,17 +99,15 @@ const LEGENDS = [
         era: '2004–2017',
         position: '포워드',
         desc: '구단 역대 최다 득점자 253골. 18세 챔피언스리그 데뷔전 해트트릭. 2011년 맨시티 전 오버헤드킥은 역대 최고의 골 중 하나.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/2814-1492076714.jpg',
         badge: 'ALLTIME',
         badgeCls: 'bg-red-600',
     },
     {
-        name: '彼터 슈마이켈',
+        name: '피터 슈마이켈',
         nameEn: 'Peter Schmeichel',
         era: '1991–1999',
         position: '골키퍼',
         desc: '역대 최고의 골키퍼 중 하나. 1999 트레블의 주역이자 주장. 393경기 출장. 맨유 역사상 가장 위대한 키퍼.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/3459-1481040481.jpg',
         badge: 'KEEPER',
         badgeCls: 'bg-cyan-700',
     },
@@ -125,7 +117,6 @@ const LEGENDS = [
         era: '2020–현재',
         position: '어태킹 미드필더',
         desc: '2020년 1월 영입 이후 맨유 역대 최고의 미드필더 중 하나로 평가. 첫 풀시즌 23골 14어시스트. 현역 전설.',
-        img: 'https://img.a.transfermarkt.technology/portrait/big/240306-1695657600.jpg',
         badge: 'CURRENT',
         badgeCls: 'bg-orange-700',
     },
@@ -182,6 +173,27 @@ const ERAS = [
 const RECORD_TABS = ['전설 선수', '최다 출장', '최다 득점', '트로피', '시대별 역사'] as const;
 type RecordTab = typeof RECORD_TABS[number];
 
+function LegendPhoto({ nameEn, name, size = 'md' }: { nameEn: string; name: string; size?: 'md' | 'sm' }) {
+    const [imgError, setImgError] = useState(false);
+    const src = legendImg(nameEn);
+    const md = size === 'md';
+    const boxCls = md ? 'w-16 h-16 rounded-xl' : 'w-9 h-9 rounded-full';
+    const fallback = (
+        <div className={`${boxCls} bg-gradient-to-br from-red-900/40 to-[#1a1a1a] flex items-center justify-center shrink-0`}>
+            <span className={md ? 'text-2xl' : 'text-sm'}>{size === 'sm' ? '⚽' : '👤'}</span>
+        </div>
+    );
+    if (!src || imgError) return fallback;
+    return (
+        <img
+            src={src}
+            alt={name}
+            className={`${boxCls} object-cover bg-[#1a1a1a] shrink-0`}
+            onError={() => setImgError(true)}
+        />
+    );
+}
+
 export default function LegendsPage() {
     const [tab, setTab] = useState<RecordTab>('전설 선수');
 
@@ -191,7 +203,7 @@ export default function LegendsPage() {
             <div className="relative bg-gradient-to-b from-red-950 via-[#1e0a0a] to-[#1a1a1a] pt-8 pb-6 px-4 text-center overflow-hidden">
                 <div className="absolute inset-0 opacity-5 bg-[url('/logo.png')] bg-center bg-no-repeat bg-contain" />
                 <p className="text-red-400/70 text-xs uppercase tracking-[0.3em] mb-2">Manchester United</p>
-                <h1 className="text-2xl font-black text-white tracking-tight">명예의 전당</h1>
+                <h1 className="text-2xl font-black text-white tracking-tight">전설의 명당</h1>
                 <p className="text-gray-400 text-xs mt-1">역대 기록 · 전설 · 트로피 캐비닛</p>
             </div>
 
@@ -223,21 +235,7 @@ export default function LegendsPage() {
                             <div key={l.nameEn} className="bg-[#252525] rounded-2xl overflow-hidden">
                                 <div className="flex gap-4 p-4">
                                     <div className="shrink-0">
-                                        {l.img ? (
-                                            <img
-                                                src={l.img}
-                                                alt={l.name}
-                                                className="w-16 h-16 rounded-xl object-cover bg-[#1a1a1a]"
-                                                onError={e => {
-                                                    (e.target as HTMLImageElement).src = '';
-                                                    (e.target as HTMLImageElement).className = 'w-16 h-16 rounded-xl bg-gradient-to-br from-red-900/40 to-[#1a1a1a] flex items-center justify-center';
-                                                }}
-                                            />
-                                        ) : (
-                                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-red-900/40 to-[#1a1a1a] flex items-center justify-center">
-                                                <span className="text-2xl">👤</span>
-                                            </div>
-                                        )}
+                                        <LegendPhoto nameEn={l.nameEn} name={l.name} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -272,13 +270,7 @@ export default function LegendsPage() {
                                 <span className={`w-6 text-center text-sm font-black shrink-0 ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-gray-300' : i === 2 ? 'text-amber-600' : 'text-gray-600'}`}>
                                     {i + 1}
                                 </span>
-                                {p.img ? (
-                                    <img src={p.img} alt={p.name} className="w-9 h-9 rounded-full object-cover bg-[#1a1a1a] shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                ) : (
-                                    <div className="w-9 h-9 rounded-full bg-[#333] shrink-0 flex items-center justify-center">
-                                        <span className="text-sm">👤</span>
-                                    </div>
-                                )}
+                                <LegendPhoto nameEn={p.nameEn} name={p.name} size="sm" />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-white">{p.name}</p>
                                     <p className="text-[10px] text-gray-500">{p.years}</p>
@@ -306,13 +298,7 @@ export default function LegendsPage() {
                                 <span className={`w-6 text-center text-sm font-black shrink-0 ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-gray-300' : i === 2 ? 'text-amber-600' : 'text-gray-600'}`}>
                                     {i + 1}
                                 </span>
-                                {p.img ? (
-                                    <img src={p.img} alt={p.name} className="w-9 h-9 rounded-full object-cover bg-[#1a1a1a] shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                ) : (
-                                    <div className="w-9 h-9 rounded-full bg-[#333] shrink-0 flex items-center justify-center">
-                                        <span className="text-sm">⚽</span>
-                                    </div>
-                                )}
+                                <LegendPhoto nameEn={p.nameEn} name={p.name} size="sm" />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-white">{p.name}</p>
                                     <p className="text-[10px] text-gray-500">{p.years}</p>

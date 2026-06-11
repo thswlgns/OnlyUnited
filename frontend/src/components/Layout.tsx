@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { label: '시즌', path: '/season' },
   { label: '선수단', path: '/squad' },
   { label: '이적', path: '/transfer' },
-  { label: '레전드', path: '/legends' },
+  { label: '전설의 명당', path: '/legends' },
   { label: '순위표', path: '/standings' },
   { label: '커뮤니티', path: '/board' },
   { label: '뉴스', path: '/news' },
